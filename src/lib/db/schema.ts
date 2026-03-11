@@ -12,6 +12,7 @@ import {
 
 // Enums
 export const monitorStatusEnum = pgEnum("monitor_status", [
+  "pending",
   "healthy",
   "late",
   "down",
@@ -93,7 +94,7 @@ export const monitors = pgTable("monitors", {
     .references(() => projects.id)
     .notNull(),
   name: text("name").notNull(),
-  status: monitorStatusEnum("status").notNull().default("healthy"),
+  status: monitorStatusEnum("status").notNull().default("pending"),
   schedule: text("schedule").notNull(),
   gracePeriod: integer("grace_period").notNull().default(300),
   pingUrl: text("ping_url")
