@@ -21,6 +21,17 @@ export async function GET(
 
   const now = new Date();
 
+  // Rate limit: 1 ping per second per monitor
+  if (monitor.lastPingAt) {
+    const elapsed = now.getTime() - monitor.lastPingAt.getTime();
+    if (elapsed < 1000) {
+      return NextResponse.json(
+        { error: "Rate limited — 1 ping per second" },
+        { status: 429 },
+      );
+    }
+  }
+
   // Store the ping and update the monitor in parallel
   await Promise.all([
     db.insert(pings).values({
@@ -39,3 +50,6 @@ export async function GET(
 
   return NextResponse.json({ status: "ok" });
 }
+
+// Support both GET and POST for flexibility
+export const POST = GET;

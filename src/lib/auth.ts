@@ -18,6 +18,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   providers: [GitHub],
+  pages: {
+    signIn: "/signin",
+  },
   events: {
     createUser: async ({ user }) => {
       if (user.id) {
