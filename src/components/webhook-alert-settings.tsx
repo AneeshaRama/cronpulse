@@ -3,23 +3,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 
-interface EmailChannel {
+interface WebhookChannel {
   id: string;
-  email: string;
+  url: string;
+  label?: string;
   enabled: boolean;
 }
 
-export function EmailAlertSettings({
+export function WebhookAlertSettings({
   projectId,
   initialChannels,
 }: {
   projectId: string;
-  initialChannels: EmailChannel[];
+  initialChannels: WebhookChannel[];
 }) {
-  const [channels, setChannels] = useState<EmailChannel[]>(initialChannels);
-  const [newEmail, setNewEmail] = useState("");
+  const [channels, setChannels] = useState<WebhookChannel[]>(initialChannels);
+  const [url, setUrl] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -28,29 +29,31 @@ export function EmailAlertSettings({
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!newEmail.trim()) return;
+    if (!url.trim()) return;
 
     setAdding(true);
     try {
       const res = await fetch("/api/alert-channels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, type: "email", email: newEmail.trim() }),
+        body: JSON.stringify({ projectId, type: "webhook", url: url.trim() }),
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to add email");
+        throw new Error(data.error || "Failed to add webhook");
       }
       const channel = await res.json();
+      const config = channel.config as { url: string; label?: string };
       setChannels((prev) => [
         ...prev,
         {
           id: channel.id,
-          email: (channel.config as { email: string }).email,
+          url: config.url,
+          label: config.label,
           enabled: channel.enabled,
         },
       ]);
-      setNewEmail("");
+      setUrl("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -73,7 +76,7 @@ export function EmailAlertSettings({
         ),
       );
     } catch {
-      // Silently fail
+      // State stays the same
     } finally {
       setTogglingId(null);
     }
@@ -92,19 +95,28 @@ export function EmailAlertSettings({
     }
   }
 
+  function truncateUrl(urlStr: string) {
+    try {
+      const parsed = new URL(urlStr);
+      const path =
+        parsed.pathname.length > 20
+          ? parsed.pathname.slice(0, 20) + "..."
+          : parsed.pathname;
+      return `${parsed.host}${path}`;
+    } catch {
+      return urlStr.slice(0, 40);
+    }
+  }
+
   return (
     <div className="space-y-3">
-      {channels.length > 0 ? (
+      {channels.length > 0 && (
         <div className="divide-y divide-border/30">
           {channels.map((channel) => (
-            <div
-              key={channel.id}
-              className="flex items-center justify-between py-2.5 first:pt-0"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                <span className="text-sm truncate">{channel.email}</span>
-              </div>
+            <div key={channel.id} className="flex items-center justify-between py-2.5 first:pt-0">
+              <span className="text-sm font-mono text-muted-foreground truncate">
+                {truncateUrl(channel.url)}
+              </span>
               <div className="flex items-center gap-2 shrink-0 pl-4">
                 <button
                   type="button"
@@ -137,20 +149,20 @@ export function EmailAlertSettings({
             </div>
           ))}
         </div>
-      ) : null}
+      )}
 
       <form onSubmit={handleAdd} className="flex items-center gap-2">
         <Input
-          type="email"
-          placeholder="name@example.com"
-          value={newEmail}
+          type="url"
+          placeholder="https://your-server.com/webhook"
+          value={url}
           onChange={(e) => {
-            setNewEmail(e.target.value);
+            setUrl(e.target.value);
             setError(null);
           }}
-          className="flex-1"
+          className="flex-1 font-mono text-sm"
         />
-        <Button type="submit" size="sm" disabled={adding || !newEmail.trim()}>
+        <Button type="submit" size="sm" disabled={adding || !url.trim()}>
           {adding ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -160,9 +172,7 @@ export function EmailAlertSettings({
         </Button>
       </form>
 
-      {error && (
-        <p className="text-xs text-red-400">{error}</p>
-      )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }

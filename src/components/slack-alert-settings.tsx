@@ -3,23 +3,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 
-interface EmailChannel {
+interface SlackChannel {
   id: string;
-  email: string;
+  webhookUrl: string;
   enabled: boolean;
 }
 
-export function EmailAlertSettings({
+export function SlackAlertSettings({
   projectId,
   initialChannels,
 }: {
   projectId: string;
-  initialChannels: EmailChannel[];
+  initialChannels: SlackChannel[];
 }) {
-  const [channels, setChannels] = useState<EmailChannel[]>(initialChannels);
-  const [newEmail, setNewEmail] = useState("");
+  const [channels, setChannels] = useState<SlackChannel[]>(initialChannels);
+  const [webhookUrl, setWebhookUrl] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
@@ -28,29 +28,29 @@ export function EmailAlertSettings({
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!newEmail.trim()) return;
+    if (!webhookUrl.trim()) return;
 
     setAdding(true);
     try {
       const res = await fetch("/api/alert-channels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, type: "email", email: newEmail.trim() }),
+        body: JSON.stringify({ projectId, type: "slack", webhookUrl: webhookUrl.trim() }),
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to add email");
+        throw new Error(data.error || "Failed to add Slack webhook");
       }
       const channel = await res.json();
       setChannels((prev) => [
         ...prev,
         {
           id: channel.id,
-          email: (channel.config as { email: string }).email,
+          webhookUrl: (channel.config as { webhookUrl: string }).webhookUrl,
           enabled: channel.enabled,
         },
       ]);
-      setNewEmail("");
+      setWebhookUrl("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -73,7 +73,7 @@ export function EmailAlertSettings({
         ),
       );
     } catch {
-      // Silently fail
+      // State stays the same
     } finally {
       setTogglingId(null);
     }
@@ -92,19 +92,24 @@ export function EmailAlertSettings({
     }
   }
 
+  function maskUrl(url: string) {
+    try {
+      const parts = url.split("/");
+      return `hooks.slack.com/.../${parts[parts.length - 1].slice(0, 6)}`;
+    } catch {
+      return "***";
+    }
+  }
+
   return (
     <div className="space-y-3">
-      {channels.length > 0 ? (
+      {channels.length > 0 && (
         <div className="divide-y divide-border/30">
           {channels.map((channel) => (
-            <div
-              key={channel.id}
-              className="flex items-center justify-between py-2.5 first:pt-0"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
-                <span className="text-sm truncate">{channel.email}</span>
-              </div>
+            <div key={channel.id} className="flex items-center justify-between py-2.5 first:pt-0">
+              <span className="text-sm font-mono text-muted-foreground truncate">
+                {maskUrl(channel.webhookUrl)}
+              </span>
               <div className="flex items-center gap-2 shrink-0 pl-4">
                 <button
                   type="button"
@@ -137,20 +142,20 @@ export function EmailAlertSettings({
             </div>
           ))}
         </div>
-      ) : null}
+      )}
 
       <form onSubmit={handleAdd} className="flex items-center gap-2">
         <Input
-          type="email"
-          placeholder="name@example.com"
-          value={newEmail}
+          type="url"
+          placeholder="https://hooks.slack.com/services/..."
+          value={webhookUrl}
           onChange={(e) => {
-            setNewEmail(e.target.value);
+            setWebhookUrl(e.target.value);
             setError(null);
           }}
-          className="flex-1"
+          className="flex-1 font-mono text-sm"
         />
-        <Button type="submit" size="sm" disabled={adding || !newEmail.trim()}>
+        <Button type="submit" size="sm" disabled={adding || !webhookUrl.trim()}>
           {adding ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -160,9 +165,7 @@ export function EmailAlertSettings({
         </Button>
       </form>
 
-      {error && (
-        <p className="text-xs text-red-400">{error}</p>
-      )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
