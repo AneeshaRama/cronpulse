@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend;
+function getResend() {
+  if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
+  return resend;
+}
 
 const FROM_EMAIL = "CronPulse <onboarding@resend.dev>";
 
@@ -19,13 +23,18 @@ export async function sendAlertEmail({
   schedule,
   lastPingAt,
 }: AlertEmailParams) {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn("[alerts] Email skipped — RESEND_API_KEY not configured");
+    return null;
+  }
+
   const statusLabel = status === "late" ? "Late" : "Down";
   const statusEmoji = status === "late" ? "\u26a0\ufe0f" : "\ud83d\udea8";
   const lastPingText = lastPingAt
     ? lastPingAt.toUTCString()
     : "Never";
 
-  const { data, error } = await resend.emails.send({
+  const { data, error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to,
     subject: `${statusEmoji} ${monitorName} is ${statusLabel}`,
