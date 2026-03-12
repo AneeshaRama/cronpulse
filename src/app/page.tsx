@@ -29,6 +29,12 @@ export default function LandingPage() {
             <span className="text-lg font-bold tracking-tight">CronPulse</span>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/docs"
+              className="flex h-9 items-center rounded-lg px-3 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Docs
+            </Link>
             <a
               href="https://github.com/AneeshaRama/cronpulse"
               target="_blank"
