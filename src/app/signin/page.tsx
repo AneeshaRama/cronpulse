@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { signIn } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
@@ -23,9 +24,9 @@ export default function SignInPage() {
           <div className="flex items-center justify-center rounded-2xl bg-primary/10 p-4 ring-1 ring-primary/20">
             <PulseIcon />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <Link href="/" className="text-3xl font-bold tracking-tight hover:opacity-80 transition-opacity">
             Cron<span className="text-primary">Pulse</span>
-          </h1>
+          </Link>
         </div>
 
         {/* Sign in button */}
