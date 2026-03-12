@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { monitors } from "@/lib/db/schema";
 import { eq, ne } from "drizzle-orm";
 import { parseExpression } from "cron-parser";
+import { dispatchAlerts } from "@/lib/alerts/dispatch";
 
 export async function checkOverdueMonitors() {
   // Get all monitors that aren't pending (pending = never pinged, nothing to check)
@@ -49,6 +50,16 @@ export async function checkOverdueMonitors() {
           console.log(
             `[overdue-checker] Monitor "${monitor.name}" (${monitor.id}) marked as ${newStatus}`,
           );
+
+          // Queue alerts for all configured channels
+          await dispatchAlerts({
+            monitorId: monitor.id,
+            projectId: monitor.projectId,
+            monitorName: monitor.name,
+            status: newStatus,
+            schedule: monitor.schedule,
+            lastPingAt: monitor.lastPingAt,
+          });
         }
       }
     } catch (error) {

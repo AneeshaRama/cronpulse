@@ -22,8 +22,10 @@ type MonitorStatus = "pending" | "healthy" | "late" | "down";
 
 export default async function MonitorDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ projectId?: string }>;
 }) {
   const session = await auth();
 
@@ -32,6 +34,8 @@ export default async function MonitorDetailPage({
   }
 
   const { id } = await params;
+  const { projectId } = await searchParams;
+  const backHref = projectId ? `/dashboard?projectId=${projectId}` : "/dashboard";
 
   // Fetch monitor with ownership check
   const result = await db
@@ -108,7 +112,7 @@ export default async function MonitorDetailPage({
       {/* Top bar: back link + actions */}
       <div className="flex items-center justify-between">
         <Link
-          href="/dashboard"
+          href={backHref}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

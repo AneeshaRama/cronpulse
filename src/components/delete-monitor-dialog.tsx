@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2, Loader2, AlertTriangle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface MonitorData {
   id: string;
@@ -22,6 +22,7 @@ interface MonitorData {
 }
 
 export function DeleteMonitorDialog({ monitor }: { monitor: MonitorData }) {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -55,7 +56,8 @@ export function DeleteMonitorDialog({ monitor }: { monitor: MonitorData }) {
       }
 
       setOpen(false);
-      router.push("/dashboard");
+      const projectId = searchParams.get("projectId");
+      router.push(projectId ? `/dashboard?projectId=${projectId}` : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
