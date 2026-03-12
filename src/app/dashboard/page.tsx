@@ -106,7 +106,7 @@ export default async function DashboardPage({
           </div>
           <div className="space-y-2">
             {jobList.map((monitor) => (
-              <MonitorCard key={monitor.id} monitor={monitor} />
+              <MonitorCard key={monitor.id} monitor={monitor} projectId={project.id} />
             ))}
           </div>
         </div>
@@ -126,7 +126,7 @@ function StatsRow({
       value: counts.total,
       icon: Activity,
       color: "text-foreground",
-      bg: "bg-foreground/5",
+      bg: "bg-foreground/10",
       border: "border-border/50",
     },
     {
@@ -134,24 +134,24 @@ function StatsRow({
       value: counts.healthy,
       icon: CheckCircle2,
       color: "text-emerald-400",
-      bg: "bg-emerald-500/5",
-      border: "border-emerald-500/10",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
     },
     {
       label: "Late",
       value: counts.late,
       icon: AlertTriangle,
       color: "text-yellow-400",
-      bg: "bg-yellow-500/5",
-      border: "border-yellow-500/10",
+      bg: "bg-yellow-500/10",
+      border: "border-yellow-500/20",
     },
     {
       label: "Down",
       value: counts.down,
       icon: XCircle,
       color: "text-red-400",
-      bg: "bg-red-500/5",
-      border: "border-red-500/10",
+      bg: "bg-red-500/10",
+      border: "border-red-500/20",
     },
   ];
 
@@ -166,7 +166,7 @@ function StatsRow({
             <p className="text-xs font-medium text-muted-foreground">
               {stat.label}
             </p>
-            <stat.icon className={`h-4 w-4 ${stat.color} opacity-60`} />
+            <stat.icon className={`h-4 w-4 ${stat.color}`} />
           </div>
           <p className={`mt-2 text-2xl font-semibold tracking-tight ${stat.color}`}>
             {stat.value}
@@ -177,7 +177,7 @@ function StatsRow({
   );
 }
 
-function MonitorCard({ monitor }: { monitor: Monitor }) {
+function MonitorCard({ monitor, projectId }: { monitor: Monitor; projectId?: string }) {
   const statusConfig: Record<
     MonitorStatus,
     { label: string; className: string }
@@ -206,7 +206,7 @@ function MonitorCard({ monitor }: { monitor: Monitor }) {
 
   return (
     <Link
-      href={`/dashboard/monitors/${monitor.id}`}
+      href={`/dashboard/monitors/${monitor.id}${projectId ? `?projectId=${projectId}` : ""}`}
       className="group block rounded-xl border border-border/50 bg-card/50 p-4 transition-colors hover:bg-card/80 hover:border-border"
     >
       <div className="flex items-center justify-between">

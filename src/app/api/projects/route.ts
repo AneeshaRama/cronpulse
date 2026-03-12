@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { projects } from "@/lib/db/schema";
+import { projects, alertChannels } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -32,9 +32,19 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       name: parsed.data.name,
     })
-    .returning();
+    .returning()
+    .then((rows) => rows[0]);
 
-  return NextResponse.json(project[0], { status: 201 });
+  // Auto-add user's email as default alert channel
+  if (session.user.email) {
+    await db.insert(alertChannels).values({
+      projectId: project.id,
+      type: "email",
+      config: { email: session.user.email },
+    });
+  }
+
+  return NextResponse.json(project, { status: 201 });
 }
 
 export async function GET() {

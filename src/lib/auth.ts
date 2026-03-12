@@ -7,6 +7,7 @@ import {
   accounts,
   sessions,
   projects,
+  alertChannels,
   verificationTokens,
 } from "@/lib/db/schema";
 
@@ -24,10 +25,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   events: {
     createUser: async ({ user }) => {
       if (user.id) {
-        await db.insert(projects).values({
-          userId: user.id,
-          name: "My Project",
-        });
+        const project = await db
+          .insert(projects)
+          .values({
+            userId: user.id,
+            name: "My Project",
+          })
+          .returning()
+          .then((rows) => rows[0]);
+
+        // Auto-add user's email as default alert channel
+        if (user.email && project) {
+          await db.insert(alertChannels).values({
+            projectId: project.id,
+            type: "email",
+            config: { email: user.email },
+          });
+        }
       }
     },
   },
