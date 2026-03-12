@@ -8,6 +8,20 @@
       "when": 1773166830915,
       "tag": "0000_cool_kylun",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773320943110,
+      "tag": "0001_deep_squirrel_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773323871375,
+      "tag": "0002_flawless_union_jack",
+      "breakpoints": true
     }
   ]
 }

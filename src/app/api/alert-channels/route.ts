@@ -92,11 +92,13 @@ export async function POST(request: NextRequest) {
   // Build config and check duplicates based on type
   let config: Record<string, string>;
 
-  switch (parsed.data.type) {
+  const d = parsed.data;
+
+  switch (d.type) {
     case "email": {
-      config = { email: parsed.data.email };
+      config = { email: d.email };
       const duplicate = existing.find(
-        (ch) => (ch.config as { email: string }).email === parsed.data.email,
+        (ch) => (ch.config as { email: string }).email === d.email,
       );
       if (duplicate) {
         return NextResponse.json(
@@ -107,11 +109,10 @@ export async function POST(request: NextRequest) {
       break;
     }
     case "discord": {
-      config = { webhookUrl: parsed.data.webhookUrl };
+      config = { webhookUrl: d.webhookUrl };
       const duplicate = existing.find(
         (ch) =>
-          (ch.config as { webhookUrl: string }).webhookUrl ===
-          parsed.data.webhookUrl,
+          (ch.config as { webhookUrl: string }).webhookUrl === d.webhookUrl,
       );
       if (duplicate) {
         return NextResponse.json(
@@ -122,11 +123,10 @@ export async function POST(request: NextRequest) {
       break;
     }
     case "slack": {
-      config = { webhookUrl: parsed.data.webhookUrl };
+      config = { webhookUrl: d.webhookUrl };
       const duplicate = existing.find(
         (ch) =>
-          (ch.config as { webhookUrl: string }).webhookUrl ===
-          parsed.data.webhookUrl,
+          (ch.config as { webhookUrl: string }).webhookUrl === d.webhookUrl,
       );
       if (duplicate) {
         return NextResponse.json(
@@ -137,10 +137,9 @@ export async function POST(request: NextRequest) {
       break;
     }
     case "telegram": {
-      config = { botToken: parsed.data.botToken, chatId: parsed.data.chatId };
+      config = { botToken: d.botToken, chatId: d.chatId };
       const duplicate = existing.find(
-        (ch) =>
-          (ch.config as { chatId: string }).chatId === parsed.data.chatId,
+        (ch) => (ch.config as { chatId: string }).chatId === d.chatId,
       );
       if (duplicate) {
         return NextResponse.json(
@@ -151,10 +150,10 @@ export async function POST(request: NextRequest) {
       break;
     }
     case "webhook": {
-      config = { url: parsed.data.url };
-      if (parsed.data.label) config.label = parsed.data.label;
+      config = { url: d.url };
+      if (d.label) config.label = d.label;
       const duplicate = existing.find(
-        (ch) => (ch.config as { url: string }).url === parsed.data.url,
+        (ch) => (ch.config as { url: string }).url === d.url,
       );
       if (duplicate) {
         return NextResponse.json(
