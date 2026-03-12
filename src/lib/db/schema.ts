@@ -23,6 +23,7 @@ export const alertChannelTypeEnum = pgEnum("alert_channel_type", [
   "slack",
   "discord",
   "telegram",
+  "webhook",
 ]);
 
 export const alertStatusEnum = pgEnum("alert_status", [
