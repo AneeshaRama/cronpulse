@@ -10,7 +10,21 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "CronPulse",
-  description: "The open source platform for cron jobs — monitor, schedule, and get alerted.",
+  description:
+    "The open source platform for cron jobs — monitor your existing cron jobs and get alerted on Discord, Slack, Telegram, and email when something goes wrong.",
+  openGraph: {
+    title: "CronPulse",
+    description:
+      "The open source platform for cron jobs — monitor your existing cron jobs and get alerted when something goes wrong.",
+    siteName: "CronPulse",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CronPulse",
+    description:
+      "The open source platform for cron jobs — monitor your existing cron jobs and get alerted when something goes wrong.",
+  },
 };
 
 export default function RootLayout({
