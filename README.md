@@ -242,6 +242,7 @@ cronpulse/
 - [ ] **Reminders** — Use scheduled jobs as a notification-only reminder system
 - [ ] **MCP server** — Let AI agents create, manage, and monitor cron jobs programmatically
 - [ ] **API keys** — Programmatic access to all CronPulse features
+- [ ] **Overlap detection** — Warn when two or more cron jobs are scheduled to run at the same time
 
 ## License
 
