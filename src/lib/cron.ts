@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { checkOverdueMonitors } from "@/lib/monitor/check-overdue";
 import { processAlertQueue } from "@/lib/alerts/process";
+import { executeScheduledJobs } from "@/lib/scheduler/execute";
 
 let initialized = false;
 
@@ -23,6 +24,15 @@ export function startCronJobs() {
       await processAlertQueue();
     } catch (error) {
       console.error("[cron] Error processing alert queue:", error);
+    }
+  });
+
+  // Execute scheduled jobs every minute
+  cron.schedule("* * * * *", async () => {
+    try {
+      await executeScheduledJobs();
+    } catch (error) {
+      console.error("[cron] Error executing scheduled jobs:", error);
     }
   });
 
