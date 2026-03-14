@@ -32,6 +32,22 @@ export const alertStatusEnum = pgEnum("alert_status", [
   "failed",
 ]);
 
+export const scheduledJobStatusEnum = pgEnum("scheduled_job_status", [
+  "active",
+  "paused",
+]);
+
+export const scheduledJobTypeEnum = pgEnum("scheduled_job_type", [
+  "http",
+  "reminder",
+]);
+
+export const runStatusEnum = pgEnum("run_status", [
+  "success",
+  "failed",
+  "timeout",
+]);
+
 // Tables
 export const users = pgTable("users", {
   id: text("id")
@@ -131,6 +147,45 @@ export const alertChannels = pgTable("alert_channels", {
   enabled: boolean("enabled").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const scheduledJobs = pgTable("scheduled_jobs", {
+  id: text("id")
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  projectId: text("project_id")
+    .references(() => projects.id)
+    .notNull(),
+  name: text("name").notNull(),
+  status: scheduledJobStatusEnum("status").notNull().default("active"),
+  type: scheduledJobTypeEnum("type").notNull().default("http"),
+  schedule: text("schedule").notNull(),
+  httpUrl: text("http_url"),
+  httpMethod: text("http_method").notNull().default("GET"),
+  httpHeaders: jsonb("http_headers"),
+  httpBody: text("http_body"),
+  timeoutMs: integer("timeout_ms").notNull().default(30000),
+  lastRunAt: timestamp("last_run_at"),
+  nextRunAt: timestamp("next_run_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const scheduledRuns = pgTable("scheduled_runs", {
+  id: text("id")
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  jobId: text("job_id")
+    .references(() => scheduledJobs.id, { onDelete: "cascade" })
+    .notNull(),
+  status: runStatusEnum("status").notNull(),
+  responseCode: integer("response_code"),
+  responseTimeMs: integer("response_time_ms"),
+  responseBody: text("response_body"),
+  errorMessage: text("error_message"),
+  startedAt: timestamp("started_at").notNull(),
+  completedAt: timestamp("completed_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const alertQueue = pgTable("alert_queue", {
