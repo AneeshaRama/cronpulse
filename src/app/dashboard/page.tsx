@@ -14,6 +14,8 @@ import {
   Radio,
 } from "lucide-react";
 import { CreateMonitorDialog } from "@/components/create-monitor-dialog";
+import { OverlapWarningBanner } from "@/components/overlap-warning";
+import { detectOverlaps } from "@/lib/monitor/detect-overlaps";
 
 type MonitorStatus = "pending" | "healthy" | "late" | "down";
 
@@ -90,6 +92,11 @@ export default async function DashboardPage({
 
       {/* Stats overview */}
       {jobList.length > 0 && <StatsRow counts={counts} />}
+
+      {/* Overlap warnings */}
+      {jobList.length > 1 && (
+        <OverlapWarningBanner warnings={detectOverlaps(jobList)} />
+      )}
 
       {/* Monitor list */}
       {jobList.length === 0 ? (
