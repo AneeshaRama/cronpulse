@@ -236,14 +236,14 @@ cronpulse/
 
 ## Roadmap
 
-- [ ] **Scheduled jobs** — Create and run cron jobs directly from CronPulse (HTTP calls on a schedule)
-- [ ] **Execution history** — Track every scheduled run with status, response time, and response code
 - [ ] **Alerts for scheduled jobs** — Get notified when a scheduled job fails
-- [ ] **Reminders** — Use scheduled jobs as a notification-only reminder system
 - [ ] **MCP server** — Let AI agents create, manage, and monitor cron jobs programmatically
 - [ ] **API keys** — Programmatic access to all CronPulse features
 ### Completed
 
+- **Scheduled jobs** — Create and run cron jobs directly from CronPulse (HTTP calls on a schedule)
+- **Execution history** — Track every scheduled run with status, response time, and response code
+- **Reminders** — Use scheduled jobs as a notification-only reminder system
 - **Overlap detection** — Warn when two or more cron jobs are scheduled to run at the same time
 
 ## License

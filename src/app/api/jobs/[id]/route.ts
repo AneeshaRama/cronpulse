@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { monitors, projects } from "@/lib/db/schema";
+import { monitors, pings, alertQueue, projects } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
@@ -101,6 +101,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Monitor not found" }, { status: 404 });
   }
 
+  // Delete related rows first (foreign key constraints)
+  await db.delete(alertQueue).where(eq(alertQueue.monitorId, id));
+  await db.delete(pings).where(eq(pings.monitorId, id));
   await db.delete(monitors).where(eq(monitors.id, id));
 
   return NextResponse.json({ message: "Monitor deleted" });
