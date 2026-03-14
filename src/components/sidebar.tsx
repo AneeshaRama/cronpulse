@@ -8,6 +8,7 @@ import {
   Settings,
   FolderOpen,
   LogOut,
+  Timer,
 } from "lucide-react";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
 
@@ -50,6 +51,7 @@ export function Sidebar({
 
   const navItems = [
     { label: "Monitors", icon: Activity, path: "/dashboard" },
+    { label: "Scheduled", icon: Timer, path: "/dashboard/scheduled" },
     { label: "Alerts", icon: Bell, path: "/dashboard/alerts" },
     { label: "Settings", icon: Settings, path: "/dashboard/settings" },
   ];
