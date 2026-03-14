@@ -18,43 +18,47 @@ export async function executeScheduledJobs() {
     );
 
   for (const job of dueJobs) {
-    const startedAt = new Date();
+    await executeJob(job);
+  }
+}
 
-    try {
-      if (job.type === "http" && job.httpUrl) {
-        await executeHttpJob(job, startedAt);
-      } else if (job.type === "reminder") {
-        await executeReminderJob(job, startedAt);
-      }
-    } catch (error) {
-      console.error(
-        `[scheduler] Unexpected error executing job "${job.name}" (${job.id}):`,
-        error,
-      );
+export async function executeJob(job: typeof scheduledJobs.$inferSelect) {
+  const startedAt = new Date();
+
+  try {
+    if (job.type === "http" && job.httpUrl) {
+      await executeHttpJob(job, startedAt);
+    } else if (job.type === "reminder") {
+      await executeReminderJob(job, startedAt);
     }
+  } catch (error) {
+    console.error(
+      `[scheduler] Unexpected error executing job "${job.name}" (${job.id}):`,
+      error,
+    );
+  }
 
-    // Update lastRunAt and compute nextRunAt regardless of success/failure
-    try {
-      const interval = parseExpression(job.schedule, {
-        currentDate: new Date(),
-        tz: "UTC",
-      });
-      const nextRunAt = interval.next().toDate();
+  // Update lastRunAt and compute nextRunAt regardless of success/failure
+  try {
+    const interval = parseExpression(job.schedule, {
+      currentDate: new Date(),
+      tz: "UTC",
+    });
+    const nextRunAt = interval.next().toDate();
 
-      await db
-        .update(scheduledJobs)
-        .set({
-          lastRunAt: startedAt,
-          nextRunAt,
-          updatedAt: new Date(),
-        })
-        .where(eq(scheduledJobs.id, job.id));
-    } catch (error) {
-      console.error(
-        `[scheduler] Error updating nextRunAt for job "${job.name}" (${job.id}):`,
-        error,
-      );
-    }
+    await db
+      .update(scheduledJobs)
+      .set({
+        lastRunAt: startedAt,
+        nextRunAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(scheduledJobs.id, job.id));
+  } catch (error) {
+    console.error(
+      `[scheduler] Error updating nextRunAt for job "${job.name}" (${job.id}):`,
+      error,
+    );
   }
 }
 

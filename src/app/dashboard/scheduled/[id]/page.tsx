@@ -17,6 +17,7 @@ import { RunHistory } from "@/components/run-history";
 import { EditScheduledJobDialog } from "@/components/edit-scheduled-job-dialog";
 import { DeleteScheduledJobDialog } from "@/components/delete-scheduled-job-dialog";
 import { PauseResumeButton } from "@/components/pause-resume-button";
+import { TriggerJobButton } from "@/components/trigger-job-button";
 
 type JobStatus = "active" | "paused";
 
@@ -108,6 +109,7 @@ export default async function ScheduledJobDetailPage({
           Back to scheduled jobs
         </Link>
         <div className="flex items-center gap-2">
+          <TriggerJobButton jobId={job.id} />
           <PauseResumeButton jobId={job.id} currentStatus={job.status} />
           <EditScheduledJobDialog
             job={{
